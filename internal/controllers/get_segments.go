@@ -30,6 +30,8 @@ func GetSegments(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, schemas.Error{
 			Error: "User with given ID does not exist",
 		})
+		s := `INSERT INTO users VALUES ($1)`
+		_, err = database.Exec(s, userID.UserID)
 		return
 	}
 	statement = `SELECT slugs.slug_name FROM slugs

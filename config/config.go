@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/dmishashkov/avito_test_task_2023/internal/schemas"
-	"github.com/joho/godotenv"
 	"os"
 	"strconv"
 )
@@ -41,13 +40,6 @@ func getIntEnv(key string, defaultVal int) int {
 	return defaultVal
 }
 
-func loadEnv() {
-	if err := godotenv.Load(); err != nil {
-		panic(err)
-	}
-}
-
 func init() {
-	loadEnv()
 	ProjectConfig = createConfig()
 }

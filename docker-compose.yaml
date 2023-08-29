@@ -4,11 +4,11 @@ volumes:
 services:
   database:
     build:
-      context: ./
-      dockerfile: "db.Dockerfile"
-#    restart: always
-    ports:
-      - "8081:5432"
+      context: ./build/db
+      dockerfile: "Dockerfile"
+    restart: always
+#    ports:
+#      - "${DB_HOST_PORT}:${DB_DOCKER_PORT}"
     volumes:
       - postgres_storage:/var/lib/postgresql
     environment:
@@ -16,11 +16,12 @@ services:
       POSTGRES_USER: ${DB_USER_NAME}
   my_server:
     build:
-      context: ./
-      dockerfile: "server.Dockerfile"
+      context: .
+      dockerfile: "./build/api/Dockerfile"
     ports:
-      - "5234:8080"
+      - "${SERVER_HOST_PORT}:${SERVER_DOCKER_PORT}"
     depends_on:
       - database
+    restart: always
     env_file:
       - .env

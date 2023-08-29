@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/dmishashkov/avito_test_task_2023/config"
 	_ "github.com/dmishashkov/avito_test_task_2023/config"
 	"github.com/dmishashkov/avito_test_task_2023/internal/controllers"
 	"github.com/gin-gonic/gin"
@@ -18,5 +20,5 @@ func main() {
 			"OK": "ok",
 		})
 	})
-	r.Run("0.0.0.0:8080") // TODO: get from cfg
+	r.Run(fmt.Sprintf("0.0.0.0:%d", config.ProjectConfig.Deploy.Port))
 }

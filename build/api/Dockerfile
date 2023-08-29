@@ -1,4 +1,14 @@
-FROM ubuntu:latest
-LABEL authors="Admin"
+FROM golang:latest as builder
 
-ENTRYPOINT ["top", "-b"]
+WORKDIR app
+
+COPY . ./
+
+RUN go mod download && go build -o server
+
+
+#FROM alpine
+#WORKDIR /
+#COPY --from=builder /app/server .
+
+CMD ["./server"]

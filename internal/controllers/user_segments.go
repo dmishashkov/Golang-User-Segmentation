@@ -32,17 +32,9 @@ func UserSegments(c *gin.Context) {
 	}
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, schemas.Error{
-			Error: err.Error(),
+			Error: "Error processing JSON data",
 		})
 		return
-	}
-	fmt.Println(*request.UserID, request.AddSlugs[0])
-	statement := `SELECT user_id FROM users WHERE user_id = $1`
-	row := database.QueryRow(statement, request.UserID)
-	user_id := 0
-	if err := row.Scan(&user_id); errors.Is(err, sql.ErrNoRows) {
-		s := `INSERT INTO users VALUES ($1)`
-		_, err = database.Exec(s, user_id)
 	}
 	response := struct {
 		DeletedSlugs []string
@@ -63,11 +55,11 @@ func UserSegments(c *gin.Context) {
 			}
 
 		} else {
-			s := `INSERT INTO slugs_users VALUES ($1, $2)` // (slug_id, user_id)
-			_, err = database.Exec(s, slug_id, user_id)
+			s := `INSERT INTO slugs_users (user_id, slug_id) VALUES ($1, $2)`
+			_, err = database.Exec(s, request.UserID, slug_id)
 			if err != nil {
 				if err.(*pq.Error).Code == "23505" {
-					response.Errors = append(response.Errors, schemas.Error{fmt.Sprintf("User already in slug %s", el)})
+					response.Errors = append(response.Errors, schemas.Error{fmt.Sprintf("User already in slug %s", el.Name)})
 				} else {
 					response.Errors = append(response.Errors, schemas.Error{err.Error()})
 				}
@@ -93,7 +85,7 @@ func UserSegments(c *gin.Context) {
 			}
 		} else {
 			s := `DELETE FROM slugs_users WHERE slug_id = $1 AND user_id =  $2` // (slug_id, user_id)
-			res, err := database.Exec(s, slug_id, user_id)
+			res, err := database.Exec(s, slug_id, request.UserID)
 			if err != nil {
 				response.Errors = append(response.Errors, schemas.Error{err.Error()})
 			} else if affected, _ := res.RowsAffected(); affected == 0 {

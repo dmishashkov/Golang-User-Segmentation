@@ -18,7 +18,7 @@ func createConfig() schemas.Config {
 			DBName:   getStrEnv("DB_NAME", ""),
 		},
 		Deploy: schemas.Deploy{
-			Port: getIntEnv("DEPLOY_PORT", 5050),
+			Port: getIntEnv("SERVER_DOCKER_PORT", 5050),
 		},
 	}
 }

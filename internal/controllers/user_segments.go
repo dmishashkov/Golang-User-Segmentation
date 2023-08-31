@@ -93,7 +93,6 @@ func UserSegments(c *gin.Context) {
 				}
 
 			} else {
-				response.AddedSegments = append(response.AddedSegments, el.Name)
 				s1 := `INSERT INTO segments_history (user_id, segment_id, action_date, action_type) VALUES ($1, $2, $3, $4)`
 				_, err := tr.Exec(s1, request.UserID, segmentId, time.Now(), "ADDED")
 				if err != nil {
@@ -102,6 +101,7 @@ func UserSegments(c *gin.Context) {
 					})
 					return
 				}
+				response.AddedSegments = append(response.AddedSegments, el.Name)
 			}
 
 			if el.Time != nil {
@@ -134,7 +134,6 @@ func UserSegments(c *gin.Context) {
 			} else if affected, _ := res.RowsAffected(); affected == 0 {
 				response.Errors = append(response.Errors, schemas.Error{fmt.Sprintf("User wasn't in segment with name %s", el)})
 			} else {
-				response.DeletedSegments = append(response.DeletedSegments, el)
 				s1 := `INSERT INTO segments_history (user_id, segment_id, action_date, action_type) VALUES ($1, $2, $3, $4)`
 				_, err := tr.Exec(s1, request.UserID, segmentId, time.Now(), "DELETED")
 				if err != nil {
@@ -143,6 +142,7 @@ func UserSegments(c *gin.Context) {
 					})
 					return
 				}
+				response.DeletedSegments = append(response.DeletedSegments, el)
 			}
 		}
 	}

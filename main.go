@@ -16,10 +16,5 @@ func main() {
 	r.POST("/createSegment", controllers.CreateSegment)
 	r.PUT("/editUserSegments", controllers.UserSegments)
 	r.DELETE("/deleteSegment", controllers.DeleteSegment)
-	r.GET("/test", func(context *gin.Context) {
-		context.JSON(200, gin.H{
-			"OK": "ok",
-		})
-	})
 	r.Run(fmt.Sprintf("0.0.0.0:%d", config.ProjectConfig.Deploy.Port))
 }

@@ -32,6 +32,7 @@ func CreateSegment(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, schemas.Error{
 			Error: "Percent should be in range (0;100]",
 		})
+		return
 	}
 	s := `SELECT segment_id FROM segments WHERE segment_name = $1`
 	row := database.QueryRow(s, request.SegmentName) // TODO: переделать на ошибку pg

@@ -7,7 +7,6 @@ import (
 	"github.com/dmishashkov/avito_test_task_2023/internal/db"
 	"github.com/dmishashkov/avito_test_task_2023/internal/schemas"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -42,7 +41,7 @@ func GetHistory(c *gin.Context) {
 	s := `SELECT user_id, segments.segment_name, segments_history.action_date,  segments_history.action_type FROM segments_history
 		JOIN segments USING(segment_id)
  		WHERE action_date BETWEEN $1 AND $2
- 		ORDER BY user_id`
+ 		ORDER BY user_id, action_date`
 	rows, err := database.Query(s, (*request.Begin).UTC(), (*request.End).UTC())
 
 	if err != nil {
@@ -59,7 +58,7 @@ func GetHistory(c *gin.Context) {
 		var d time.Time
 		act := ""
 		rows.Scan(&userId, &n, &d, &act)
-		err := w.Write([]string{strconv.Itoa(userId), n, act, d.Format(time.RFC822)})
+		err := w.Write([]string{strconv.Itoa(userId), n, act, d.Format(time.DateTime)})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, schemas.Error{
 				Error: fmt.Sprintf("%s: %s", "Server error", err.Error()),
@@ -68,13 +67,14 @@ func GetHistory(c *gin.Context) {
 		}
 	}
 	w.Flush()
-	log.Print(counter)
 	c.Header("Content-Type", "text/csv")
-	log.Print(buf.String())
 	_, err = c.Writer.Write(buf.Bytes())
-	c.JSON(http.StatusInternalServerError, schemas.Error{
-		Error: fmt.Sprintf("%s: %s", "Server error", err.Error()),
-	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, schemas.Error{
+			Error: fmt.Sprintf("%s: %s", "Server error", err.Error()),
+		})
+	}
+
 	c.Writer.Flush()
 
 }

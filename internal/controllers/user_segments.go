@@ -22,7 +22,7 @@ func createDeleteFunc(userID int, segmentID int) func() {
 			log.Print(err.Error())
 		}
 		s1 := `INSERT INTO segments_history (user_id, segment_id, action_date, action_type) VALUES ($1, $2, $3, $4)`
-		_, err = database.Exec(s1, userID, segmentID, time.Now().String(), "DELETED")
+		_, err = database.Exec(s1, userID, segmentID, time.Now(), "DELETED")
 		if err != nil {
 			log.Print(err.Error())
 		}

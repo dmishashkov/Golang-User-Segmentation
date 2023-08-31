@@ -11,10 +11,11 @@ import (
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
-	r.GET("/getUserSlugs", controllers.GetSegments)
-	r.POST("/createSlug", controllers.CreateSegment)
-	r.PUT("/addRemoveSlugUser", controllers.UserSegments)
-	r.DELETE("/deleteSlug", controllers.DeleteSegment)
+	r.GET("/getUserSegments", controllers.GetSegments)
+	r.GET("/getSegmentsHistory", controllers.GetHistory)
+	r.POST("/createSegment", controllers.CreateSegment)
+	r.PUT("/editUserSegments", controllers.UserSegments)
+	r.DELETE("/deleteSegment", controllers.DeleteSegment)
 	r.GET("/test", func(context *gin.Context) {
 		context.JSON(200, gin.H{
 			"OK": "ok",

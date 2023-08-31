@@ -6,7 +6,6 @@ import (
 	"github.com/dmishashkov/avito_test_task_2023/config"
 	"github.com/dmishashkov/avito_test_task_2023/internal/schemas"
 	_ "github.com/lib/pq"
-	"log"
 	"sync"
 )
 
@@ -16,23 +15,24 @@ var CreateSegment = ``
 var DeleteSegmentToUser = ``
 var AddSegmentToUser = ``
 
-func ConnectToDB(cfg schemas.DatabaseConfig) *sql.DB {
+func ConnectToDB(cfg schemas.DatabaseConfig) (*sql.DB, error) {
 	connectionString := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
 		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName)
 	db, err := sql.Open("postgres", connectionString)
-	if err != nil {
-		log.Fatal("[ConnectToDB] error while connecting to DB", err)
-	}
-	log.Println("Successfully connected to DB")
-	return db
+	//if err != nil {
+	//	log.Fatal("[ConnectToDB] error while connecting to DB", err)
+	//}
+	return db, err
 }
 
 var singleton sync.Once
-var myDB *sql.DB
+var DB *sql.DB
 
-func GetDB() *sql.DB {
+func GetDB() (*sql.DB, error) {
+	var Err error
 	singleton.Do(func() {
-		myDB = ConnectToDB(config.ProjectConfig.DB)
+		DB, Err = ConnectToDB(config.ProjectConfig.DB)
 	})
-	return myDB
+	return DB, Err
+
 }

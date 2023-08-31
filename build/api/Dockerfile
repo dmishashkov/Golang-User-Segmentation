@@ -1,14 +1,15 @@
-FROM golang:latest as builder
+FROM golang:latest AS builder
 
-WORKDIR app
+WORKDIR /app
 
 COPY . ./
 
-RUN go mod download && go build -o server
+RUN go mod download && go build -o /server
 
 
-#FROM alpine
-#WORKDIR /
-#COPY --from=builder /app/server .
 
-CMD ["./server"]
+#FROM alpine:3
+#
+#COPY --from=builder server /bin/server
+
+ENTRYPOINT ["/server"]

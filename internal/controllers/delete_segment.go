@@ -11,23 +11,29 @@ import (
 )
 
 func DeleteSegment(c *gin.Context) {
-	database := db.GetDB()
-	segment := struct {
-		SegmentName string `json:"slug_name" binding:"required"`
-	}{}
-	if err := c.BindJSON(&segment); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, schemas.Error{
-			Error: "Error processing JSON data",
+	database, err := db.GetDB()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, schemas.Error{
+			Error: "Error connecting to db",
 		})
 		return
 	}
-	statement := `SELECT slug_id FROM slugs WHERE slug_name = $1`
-	row := database.QueryRow(statement, segment.SegmentName)
+	request := struct {
+		SegmentName string `json:"segment_name" binding:"required"`
+	}{}
+	if err := c.BindJSON(&request); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, schemas.Error{
+			Error: err.Error(),
+		})
+		return
+	}
+	statement := `SELECT segment_id FROM segments WHERE segment_name = $1`
+	row := database.QueryRow(statement, request.SegmentName)
 	val := 0
 	if err := row.Scan(&val); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(http.StatusConflict, schemas.Error{
-				Error: "Nothing to delete: no such slug exists",
+				Error: "Nothing to delete: no such segment exists",
 			})
 		} else {
 			c.JSON(http.StatusInternalServerError, schemas.Error{
@@ -37,24 +43,47 @@ func DeleteSegment(c *gin.Context) {
 
 		return
 	}
-	statement1 := `DELETE FROM slugs WHERE slug_id = $1`
-	statement2 := `DELETE FROM slugs_users WHERE slug_id = $1;`
-
-	_, err := database.Exec(statement2, val)
+	tr, err := database.Begin()
+	defer tr.Rollback()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, schemas.Error{
-			Error: fmt.Sprintf("%s: %s", "DB error", err.Error()),
+			Error: "Error starting transaction",
 		})
 		return
 	}
-	_, err = database.Exec(statement1, val)
+	statement1 := `DELETE FROM segments WHERE segment_id = $1`
+	statement2 := `DELETE FROM segments_users WHERE segment_id = $1`
+	statement3 := `DELETE FROM segments_history WHERE segment_id = $1`
+
+	_, err = tr.Exec(statement2, val)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, schemas.Error{
-			Error: fmt.Sprintf("%s: %s", "DB error", err.Error()),
+			Error: fmt.Sprintf("%s: %s", "DB error while deleting segment", err.Error()),
+		})
+		return
+	}
+	_, err = tr.Exec(statement1, val)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, schemas.Error{
+			Error: fmt.Sprintf("%s: %s", "DB error while deleting segment", err.Error()),
+		})
+		return
+	}
+	_, err = tr.Exec(statement3, val)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, schemas.Error{
+			Error: fmt.Sprintf("%s: %s", "DB error while deleting segment", err.Error()),
+		})
+		return
+	}
+	err = tr.Commit()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Error commiting transaction",
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Successfully deleted slug",
+		"message": "Operation executed successfully",
 	})
 }

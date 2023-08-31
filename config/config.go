@@ -11,11 +11,11 @@ var ProjectConfig schemas.Config
 func createConfig() schemas.Config {
 	return schemas.Config{
 		DB: schemas.DatabaseConfig{
-			User:     getStrEnv("DB_USER_NAME", ""),
+			User:     getStrEnv("DB_USER_NAME", "postgres"),
 			Password: getStrEnv("DB_PASSWORD", ""),
-			Host:     getStrEnv("DB_HOST", ""),
-			Port:     getStrEnv("DB_PORT", ""),
-			DBName:   getStrEnv("DB_NAME", ""),
+			Host:     getStrEnv("DB_HOST", "database"),
+			Port:     getStrEnv("DB_DOCKER_PORT", "5432"),
+			DBName:   getStrEnv("DB_NAME", "avito2023"),
 		},
 		Deploy: schemas.Deploy{
 			Port: getIntEnv("SERVER_DOCKER_PORT", 5050),

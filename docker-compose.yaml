@@ -7,8 +7,8 @@ services:
       context: ./build/db
       dockerfile: "Dockerfile"
     restart: always
-#    ports:
-#      - "${DB_HOST_PORT}:${DB_DOCKER_PORT}"
+    ports:
+      - "${DB_HOST_PORT}:${DB_DOCKER_PORT}"
     volumes:
       - postgres_storage:/var/lib/postgresql
     environment:

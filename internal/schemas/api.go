@@ -6,7 +6,7 @@ type Error struct {
 	Error string `json:"error"`
 }
 
-type AddSlug struct {
-	Name string     `json:"slug_name"`
+type AddSegment struct {
+	Name string     `json:"segment_name"`
 	Time *time.Time `json:"delete_date"`
 }
